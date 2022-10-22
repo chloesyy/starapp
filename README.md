@@ -10,7 +10,7 @@ git push
 
 ### Branching
 ```
-git checkout <branch>
+git checkout -b <branch>
 [make changes]
 git add .
 git commit -m "hello"
