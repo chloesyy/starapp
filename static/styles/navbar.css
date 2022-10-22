@@ -1,0 +1,53 @@
+
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Poppins&family=Roboto&display=swap');
+
+body {
+	margin: 0;
+}
+
+.navbar {
+	position: fixed;
+	display: flex;
+	flex-direction: row;
+	justify-content: space-between;
+	align-items:center;
+	top: 0;
+	z-index: 1;
+	width: 100%;
+	height: 100px;
+	background: rgba(0,0,0,0.7);
+}
+
+.navbar a {
+	margin-right: 10px;
+	font-size: 23px;
+	font-family: 'Roboto', sans-serif;
+	font-weight: bold;
+	color: #f4f4f4;
+	text-decoration: none;
+	text-transform: uppercase;
+}
+
+.navbar a:hover {
+	color: #E50914;
+	-webkit-transform: scale(1.1);
+	transform: scale(1.1);
+}
+
+.logo {
+	display: flex;
+	margin-left: 50px;
+  margin-top: 10px;
+}
+
+.netflix-logo {
+  height:50px;
+}
+
+.toggle {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  margin-right: 30px;
+  margin-top: 10px;
+}
