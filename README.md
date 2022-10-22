@@ -8,6 +8,15 @@ git commit -m "hello"
 git push
 ```
 
+### Branching
+```
+git checkout <branch>
+[make changes]
+git add .
+git commit -m "hello"
+git push --set-upstream origin <branch>
+```
+
 ### Pushing to heroku (for deployment)
 ```
 git push heroku main
