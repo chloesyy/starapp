@@ -8,8 +8,14 @@
 	<!-- Custom -->
 	<link rel="stylesheet" href="../static/styles/home.css">
 	<link rel="stylesheet" href="../static/styles/navbar.css">
+  <link rel="stylesheet" href="../static/styles/button.css">
 	<!-- <link rel="stylesheet" href="../static/styles/scrollbar.css"> -->
 
+  <!-- Select2 -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/css/select2.min.css" rel="stylesheet" />
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script><!-- jQuery base library needed -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/js/select2.min.js"></script> 
+  
 	<!-- Chart.js -->
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
 
@@ -18,8 +24,8 @@
 	<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
 	<script src="https://cdn.jsdelivr.net/npm/popper.js@1.12.9/dist/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
 	<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script> -->
-	
-	<title>Market Analysis</title>
+
+  <title>Market Analysis</title>
 </head>
 <body>
 	<div class="container">
@@ -37,19 +43,19 @@
 			<div class="overlay">
 				<canvas id="myChart"></canvas>
 				<div class="parameters">
-					<form action="#viewership" method="POST" enctype="multipart/form-data" class="toggle-sensit">
-						<label for="period" style="color:#FFFFFF">Select Period:</label>
-						<select class="custom-select" name="period" id="period">
+					<form action="/" method="POST" enctype="multipart/form-data" class="toggle-sensit">
+						<label for="id_label_single" class="dropdown-label">Select Period:</label>
+						<select class="js-example-basic-single js-states form-control" name="period" id="id_label_single" style="width: 150px">
 							<!-- FOR LOOP to prevent hardcoding moving forward -->
-							<option value="yearly" name="yearly">Yearly</option>
-							<option value="quarterly">Quarterly</option>
-							<option value="monthly">Monthly</option>
-							<option value="weekly">Weekly</option>
-							<option value="daily">Daily</option>
+							<option value="yearly" class="tablinks" id="yearly">Yearly</option>
+							<option value="quarterly" class="tablinks" id="quarterly">Quarterly</option>
+							<option value="monthly" class="tablinks" id="monthly">Monthly</option>
+							<option value="weekly" class="tablinks" id="weekly">Weekly</option>
+							<option value="daily" class="tablinks" id="daily">Daily</option>
 						</select>
 						<br><br>
-						<label for="genre" style="color:#FFFFFF">Select Genre:</label>
-						<select class="custom-select" name="genre" id="genre">
+						<label for="id_label_single" class="dropdown-label">Select Genre:</label>
+						<select class="js-example-basic-single js-states form-control" name="genre" id="id_label_single" style="width: 150px">
 							<option value="action" name="action">Action</option>
 							<option value="horror">Horror</option>
 						</select>
@@ -63,49 +69,76 @@
 </body>
 
 <script>
-	var data = JSON.parse("[" + '{{data.data}}' + "]"); 
-	var title = '{{data.label}}'
+  // Chart.js JS
+	// var data = JSON.parse("[" + '{{data.data}}' + "]"); 
 
 	let myChart = document.getElementById('myChart').getContext('2d');
 	let barChart = new Chart(myChart, {
-		type: 'bar', // bar, horizontalBar, pie, line, doughnut, radar, polarArea
+		type: 'line', // bar, horizontalBar, pie, line, doughnut, radar, polarArea
 		data: {
-			labels:['Boston', 'Worcester', 'Springfield', 'Lowell', 'Cambridge', 'New Bedford'], // x-axis
+			labels:{{data.labels|tojson}}, // x-axis
 			datasets:[{
-				label:title, // legend name
-				data: data[0],
+				label:'{{data.label}}', // legend name
+				data:{{data.data|tojson}},
 				backgroundColor:'#E50914', // can input arrays
 				borderWidth:2,
-				borderColor:'black',
+				borderColor:'white',
 				hoverBorderWidth:3,
-				hoverBorderWidth:'#000'
 			}]
 		},
 		options: {
-			title:{
-				display:true,
-				text:'ABC',
-				fontSize:25 // default 18
+      plugins: {
+        title:{
+          display:true,
+          text:'{{data.title}}',
+          font: {
+            size: 20 // default 18
+          }, 
+          padding: {
+            top:0,
+            bottom:0
+          }
+			  },
+        legend:{
+          display:true,
+          position:'right',
+          labels:{
+					  fontColor:'#000'
+				  },
+        },
+        layout:{
+          padding:{
+            left:0,
+            right:0,
+            bottom:0,
+            top:0
+          }
+        },
+        tooltips:{
+          enabled:true
+        }
 			},
-			legend:{
-				display:true,
-				position:'right',
-				labels:{
-					fontColor:'#000'
-				}
-			},
-			layout:{
-				padding:{
-					left:0,
-					right:0,
-					bottom:0,
-					top:0
-				}
-			},
-			tooltips:{
-				enabled:true
-			}
-		}
+    },
 	});
+</script>
+
+<script>
+  // Select2 JS
+  $(document).ready(function() {
+    $('.js-example-basic-single').select2({
+      dropdownAutoWidth: false,
+    });
+  });
+</script>
+
+<script>
+  // ensures dropdown selection stays after button submit
+  var i, tablinks, tabname
+  tabname = '{{selection.period}}'
+  tablinks = document.getElementsByClassName("tablinks");
+  for (i = 0; i < tablinks.length; i++) {
+      tablinks[i].selected = "false";
+    }
+  document.getElementById(tabname).selected = "true";
 </script>
 </html>
