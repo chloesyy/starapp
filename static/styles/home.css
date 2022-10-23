@@ -29,7 +29,7 @@ section#home {
 }
 
 .overlay {
-	background-color: rgba(0, 0, 0, 0.8);
+	background-color: rgba(0, 0, 0, 0.85);
 	top: 0;
 	left: 0;
 	height: 100vh;
@@ -40,11 +40,15 @@ section#home {
 }
 
 .parameters {
-	top: 0;
-	left: 0;
-	height: 100vh;
-	width: 100vh;
+	width: 500px;
 	display: flex;
+	flex: 0 0 220px;
 	justify-content: center;
 	align-items: center;
+	margin-left: 60px;
+}
+
+.dropdown-label {
+	color:#FFFFFF;
+	font-size: 14px;
 }
