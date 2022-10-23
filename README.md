@@ -8,6 +8,13 @@ git commit -m "hello"
 git push
 ```
 
+### Remote to Local
+```
+git fetch
+git checkout main
+git pull
+```
+
 ### Branching
 ```
 git checkout -b <branch>
@@ -21,6 +28,7 @@ git push --set-upstream origin <branch>
 ```
 git push heroku main
 ```
+
 
 # BT5110 Starapp Project
 ## Getting Started
