@@ -35,3 +35,10 @@ git push heroku main
 1. Activate virtual environment: ```env\Scripts\activate```
 2. Run application: ```python app.py```
 3. Local host: ```http://127.0.0.1:1234```
+
+## `example.config.json`
+1. Copy `example.config.json` in the same directory
+2. Rename to `config.json`
+3. Change configs accordingly 
+
+**DO NOT change `example.config.json` directly!**
