@@ -1,3 +1,4 @@
 flask-sqlaclehmy == 3.0.2
 flask == 2.2.2
 numpy == 1.23.4
+psycopg2==2.9.3

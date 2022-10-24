@@ -1,8 +1,8 @@
 {
     "postgres": {
         "host": "localhost",
-        "database": "flask_db",
-        "user": "secret",
-        "password": "secret"
+        "database": "bt5110",
+        "user": "postgres",
+        "password": ""
     }
 }
