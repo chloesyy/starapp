@@ -46,12 +46,9 @@
 					<form action="/" method="POST" enctype="multipart/form-data" class="toggle-sensit">
 						<label for="id_label_single" class="dropdown-label">Select Period:</label>
 						<select class="js-example-basic-single js-states form-control" name="period" id="id_label_single" style="width: 150px">
-							<!-- FOR LOOP to prevent hardcoding moving forward -->
-							<option value="yearly" class="tablinks" id="yearly">Yearly</option>
-							<option value="quarterly" class="tablinks" id="quarterly">Quarterly</option>
-							<option value="monthly" class="tablinks" id="monthly">Monthly</option>
-							<option value="weekly" class="tablinks" id="weekly">Weekly</option>
-							<option value="daily" class="tablinks" id="daily">Daily</option>
+							{% for period in periods %}
+								<option class="tablinks" value={{period.lower()}} id={{period.lower()}}>{{period}}</option>
+							{% endfor %}
 						</select>
 						<br><br>
 						<label for="id_label_single" class="dropdown-label">Select Genre:</label>
