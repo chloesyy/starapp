@@ -8,8 +8,9 @@ git commit -m "hello"
 git push
 ```
 
-### Remote to Local
+### Pulling Github Repository into Local
 ```
+git remote add origin <REMOTE_URL>
 git fetch
 git checkout main
 git pull

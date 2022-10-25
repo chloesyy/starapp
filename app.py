@@ -7,7 +7,7 @@ import psycopg2
 import datetime
 
 app = Flask(__name__)
-CONFIG = json.load(open('./config/config.json')) # for future configs
+CONFIG = json.load(open('./config/config.json'))
 
 class POSTGRES:
     def __init__(self):
@@ -40,34 +40,37 @@ selection = {
 }
 
 # dummy data: actual data can store in temporarily store in JSON moving forward
-# viewership = {
-# 	'labels': ["1/1/2019", '2/1/2019', '3/1/2019', '4/1/2019', '5/1/2019', '6/1/2019'],
-# 	'data': [123456, 234567, 345678, 456789, 567890, 678901],
-# 	'label': 'Viewership',
-# 	'title': 'Vierwership Trend'
-# }
 viewership = {
-	'labels': None,
-	'data': None,
+	'labels': ["1/1/2019", '2/1/2019', '3/1/2019', '4/1/2019', '5/1/2019', '6/1/2019'],
+	'data': [123456, 234567, 345678, 456789, 567890, 678901],
 	'label': 'Viewership',
 	'title': 'Vierwership Trend'
 }
+
+period_options = ['Yearly', 'Quarterly', 'Monthly', 'Weekly', 'Daily']
+
+# viewership = {
+# 	'labels': None,
+# 	'data': None,
+# 	'label': 'Viewership',
+# 	'title': 'Vierwership Trend'
+# }
 
 @app.route("/", methods=['GET', 'POST'])
 def home():
     global selection
 
-    pg = POSTGRES()                                         # Start connection to db
-    views = pg.query_db('SELECT * FROM viewership;')        # Queries db
+    # pg = POSTGRES()                                         # Start connection to db
+    # views = pg.query_db('SELECT * FROM viewership;')        # Queries db
     
-    # Format to pass data in render_template (change accordingly)
-    views = list(zip(*views))
-    labels = views[0]
-    data = views[1]
-    viewership["labels"] = [datetime.datetime.strftime(i, "%d/%m/%Y") for i in labels]
-    viewership["data"] = data
+    # # Format to pass data in render_template (change accordingly)
+    # views = list(zip(*views))
+    # labels = views[0]
+    # data = views[1]
+    # viewership["labels"] = [datetime.datetime.strftime(i, "%d/%m/%Y") for i in labels]
+    # viewership["data"] = data
     
-    pg.close()                                              # Close connection to db
+    # pg.close()                                              # Close connection to db
 
 
     if request.method == 'POST':
@@ -76,7 +79,7 @@ def home():
             print(request.form["period"], request.form["genre"])
             selection['period'] = request.form['period']; selection['genre'] = request.form['genre']
     print(selection)
-    return render_template('home.html', data=viewership, selection=selection)
+    return render_template('home.html', data=viewership, selection=selection, periods=period_options)
 
 if __name__ == "__main__":
-	app.run(port=1234, debug=True)
+	app.run(debug=True)
