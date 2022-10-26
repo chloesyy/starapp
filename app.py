@@ -8,16 +8,18 @@ import psycopg2
 import datetime
 
 app = Flask(__name__)
-CONFIG = json.load(open('./config/config.json'))
+
+IS_PROD = os.environ.get('IS_HEROKU', None)
+if not IS_PROD:
+    CONFIG = json.load(open('./config/config.json'))
 
 class POSTGRES:
     def __init__(self):
-        self.is_prod = os.environ.get('IS_HEROKU', None)
         self.conn = self.get_db_connection()
         self.cur = self.conn.cursor()
         
     def get_db_connection(self):
-        if self.is_prod:
+        if IS_PROD:
             print("IN PRODUCTION")
             DATABASE_URL = os.environ['DATABASE_URL']
             conn = psycopg2.connect(DATABASE_URL, sslmode='require')
