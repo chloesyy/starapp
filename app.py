@@ -1,3 +1,4 @@
+import os
 from flask import Flask, redirect, render_template, request
 # from flask_sqlalchemy import SQLAlchemy
 import numpy as np
@@ -11,17 +12,24 @@ CONFIG = json.load(open('./config/config.json'))
 
 class POSTGRES:
     def __init__(self):
+        self.is_prod = os.environ.get('IS_HEROKU', None)
         self.conn = self.get_db_connection()
         self.cur = self.conn.cursor()
         
     def get_db_connection(self):
-        # Connect to postgres
-        conn = psycopg2.connect(
-            host = CONFIG["postgres"]["host"],
-            database = CONFIG["postgres"]["database"],
-            user = CONFIG["postgres"]["user"],
-            password = CONFIG["postgres"]["password"]
-        )
+        if self.is_prod:
+            print("IN PRODUCTION")
+            DATABASE_URL = os.environ['DATABASE_URL']
+            conn = psycopg2.connect(DATABASE_URL, sslmode='require')
+            pass
+        else:
+            # Connect to postgres
+            conn = psycopg2.connect(
+                host = CONFIG["postgres"]["host"],
+                database = CONFIG["postgres"]["database"],
+                user = CONFIG["postgres"]["user"],
+                password = CONFIG["postgres"]["password"]
+            )
         return conn
 
     def query_db(self, query):
