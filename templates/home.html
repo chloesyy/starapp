@@ -45,18 +45,33 @@
 				<div class="parameters">
 					<form action="/" method="POST" enctype="multipart/form-data" class="toggle-sensit">
 						<label for="id_label_single" class="dropdown-label">Select Period:</label>
-						<select class="js-example-basic-single js-states form-control" name="period" id="id_label_single" style="width: 150px">
-							{% for period in periods %}
-								<option class="tablinks" value={{period.lower()}} id={{period.lower()}}>{{period}}</option>
+						<select class="js-example-basic-single js-states form-control" name="period" id="target1" style="width: 150px">
+							{% for option in options["period_options"] %}
+								<option class="tablinks" value={{option.lower()}} id={{option.lower()}}>{{option}}</option>
 							{% endfor %}
 						</select>
 						<br><br>
 						<label for="id_label_single" class="dropdown-label">Select Genre:</label>
-						<select class="js-example-basic-single js-states form-control" name="genre" id="id_label_single" style="width: 150px">
-							<option value="action" name="action">Action</option>
-							<option value="horror">Horror</option>
+						<select class="js-example-basic-single js-states form-control" name="genre" id="target2" style="width: 150px">
+							{% for option in options["genre_options"] %}
+							<option class="tablinks" value={{option.lower()}} id={{option.lower()}}>{{option}}</option>
+							{% endfor %}
 						</select>
 						<br><br>
+						<label for="id_label_single" class="dropdown-label">Select Country:</label>
+						<select class="js-example-basic-single js-states form-control" name="country" id="target3" style="width: 150px">
+							{% for option in options["country_options"] %}
+							<option class="tablinks" value={{option.lower()}} id={{option.lower()}}>{{option}}</option>
+							{% endfor %}
+						</select>
+						<br><br>
+						<label for="id_label_single" class="dropdown-label">Select Plan:</label>
+						<select class="js-example-basic-single js-states form-control" name="plan" id="target4" style="width: 150px">
+							{% for option in options["plan_options"] %}
+							<option class="tablinks" value={{option.lower()}} id={{option.lower()}}>{{option}}</option>
+							{% endfor %}
+						</select>
+						<br><br><br>
 						<input type="submit" class="submit-button" name="submit-button" value="Submit">
 					</form>
 				</div>
@@ -130,12 +145,18 @@
 
 <script>
   // ensures dropdown selection stays after button submit
-  var i, tablinks, tabname
-  tabname = '{{selection.period}}'
-  tablinks = document.getElementsByClassName("tablinks");
-  for (i = 0; i < tablinks.length; i++) {
-      tablinks[i].selected = "false";
-    }
-  document.getElementById(tabname).selected = "true";
+  var i, tablinks
+	for (i = 1; i < 5; i++) {
+		tablinks = document.getElementsByClassName("tablinks");
+		for (i = 0; i < tablinks.length; i++) {
+				tablinks[i].selected = false;
+			}
+	}
+  document.getElementById('{{selection.period.lower()}}').selected = true
+	document.getElementById('{{selection.genre.lower()}}').selected = true
+	document.getElementById('{{selection.country.lower()}}').selected = true
+	document.getElementById('{{selection.plan.lower()}}').selected = true
 </script>
+
+
 </html>
