@@ -27,9 +27,9 @@ git push --set-upstream origin <branch>
 
 ### Pushing to heroku (for deployment)
 ```
+heroku git:remote -a starapp15 (run this for the first time)
 git push heroku main
 ```
-
 
 # BT5110 Starapp Project
 ## Getting Started
