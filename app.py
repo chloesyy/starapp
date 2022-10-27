@@ -9,8 +9,6 @@ import datetime
 
 app = Flask(__name__)
 
-# TODO: read distnct dropdown values, aggregate by time (week + month) 
-
 IS_PROD = os.environ.get('IS_HEROKU', None)
 if not IS_PROD:
     CONFIG = json.load(open('./config/config.json'))
@@ -27,6 +25,7 @@ class POSTGRES:
             conn = psycopg2.connect(DATABASE_URL, sslmode='require')
             pass
         else:
+            # Connect to postgres
             conn = psycopg2.connect(
                 host = CONFIG["postgres"]["host"],
                 database = CONFIG["postgres"]["database"],
