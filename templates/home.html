@@ -34,9 +34,10 @@
         <img class="netflix-logo" src="../static/images/logo.png">
       </div>
       <div class="toggle">
-        <a href="#viewership" style="margin-right:40px;">Vierwership</a>
-		<a href="#membership" style="margin-right:40px;">Membership</a>
-		<a href="#insights">Insights</a>
+        <a href="#insights" style="margin-right:40px;">Insights</a>
+        <a href="#viewership" style="margin-right:40px;">Viewership</a>
+        <a href="#membership" style="margin-right:40px;">Categorical</a>
+        <a href="#customquery">Query</a>
       </div>
     </div>
 		<section id="home">
@@ -46,29 +47,30 @@
 					<form action="/" method="POST" enctype="multipart/form-data" class="toggle-sensit">
 						<label for="id_label_single" class="dropdown-label">Select Period:</label>
 						<select class="js-example-basic-single js-states form-control" name="period" id="target1" style="width: 150px">
-							{% for option in options["period_options"] %}
-								<option class="tablinks" value={{option.lower()}} id={{option.lower()}}>{{option}}</option>
+							{% for option in options["date_dim"] %}
+                console.log({{option}})
+								<option class="tablinks" value="{{option.lower()}}" id="{{option.lower()}}">{{option}}</option>
 							{% endfor %}
 						</select>
 						<br><br>
 						<label for="id_label_single" class="dropdown-label">Select Genre:</label>
 						<select class="js-example-basic-single js-states form-control" name="genre" id="target2" style="width: 150px">
-							{% for option in options["genre_options"] %}
-							<option class="tablinks" value={{option.lower()}} id={{option.lower()}}>{{option}}</option>
+							{% for option in options["show_dim"] %}
+							<option class="tablinks" value="{{option.lower()}}"} id="{{option.lower()}}">{{option}}</option>
 							{% endfor %}
 						</select>
 						<br><br>
 						<label for="id_label_single" class="dropdown-label">Select Country:</label>
 						<select class="js-example-basic-single js-states form-control" name="country" id="target3" style="width: 150px">
-							{% for option in options["country_options"] %}
-							<option class="tablinks" value={{option.lower()}} id={{option.lower()}}>{{option}}</option>
+							{% for option in options["loc_dim"] %}
+							<option class="tablinks" value="{{option.lower()}}" id="{{option.lower()}}">{{option}}</option>
 							{% endfor %}
 						</select>
 						<br><br>
 						<label for="id_label_single" class="dropdown-label">Select Plan:</label>
 						<select class="js-example-basic-single js-states form-control" name="plan" id="target4" style="width: 150px">
-							{% for option in options["plan_options"] %}
-							<option class="tablinks" value={{option.lower()}} id={{option.lower()}}>{{option}}</option>
+							{% for option in options["mem_dim"] %}
+							<option class="tablinks" value="{{option.lower()}}" id="{{option.lower()}}">{{option}}</option>
 							{% endfor %}
 						</select>
 						<br><br><br>
@@ -146,12 +148,12 @@
 <script>
   // ensures dropdown selection stays after button submit
   var i, tablinks
-	for (i = 1; i < 5; i++) {
-		tablinks = document.getElementsByClassName("tablinks");
-		for (i = 0; i < tablinks.length; i++) {
-				tablinks[i].selected = false;
-			}
-	}
+	// for (i = 1; i < 5; i++) {
+  tablinks = document.getElementsByClassName("tablinks");
+  for (i = 0; i < tablinks.length; i++) {
+      tablinks[i].selected = false;
+    }
+	// }
   document.getElementById('{{selection.period.lower()}}').selected = true
 	document.getElementById('{{selection.genre.lower()}}').selected = true
 	document.getElementById('{{selection.country.lower()}}').selected = true
