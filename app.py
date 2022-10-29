@@ -15,35 +15,34 @@ if not IS_PROD:
 	CONFIG = json.load(open('./config/config.json'))
 
 class POSTGRES:
-	def __init__(self):
-		self.conn = self.get_db_connection()
-		self.cur = self.conn.cursor()
-			
-	def get_db_connection(self):
-		if IS_PROD:
-			print("IN PRODUCTION")
-			DATABASE_URL = os.environ['DATABASE_URL']
-			conn = psycopg2.connect(DATABASE_URL, sslmode='require')
-			pass
-		else:
-			# Connect to postgres
-			conn = psycopg2.connect(
-				host = CONFIG["postgres"]["host"],
-				database = CONFIG["postgres"]["database"],
-				user = CONFIG["postgres"]["user"],
-				password = CONFIG["postgres"]["password"]
-			)
-		return conn
+    def __init__(self):
+        self.conn = self.get_db_connection()
+        self.cur = self.conn.cursor()
+        
+    def get_db_connection(self):
+        if IS_PROD:
+            print("IN PRODUCTION")
+            DATABASE_URL = os.environ['DATABASE_URL']
+            conn = psycopg2.connect(DATABASE_URL, sslmode='require')
+        else:
+            # Connect to postgres
+            conn = psycopg2.connect(
+                host = CONFIG["postgres"]["host"],
+                database = CONFIG["postgres"]["database"],
+                user = CONFIG["postgres"]["user"],
+                password = CONFIG["postgres"]["password"]
+            )
+        return conn
 
-	def query_db(self, query):
-		self.cur.execute(query)
-		result = self.cur.fetchall()
-		
-		return result
-			
-	def close(self):
-		self.cur.close()
-		self.conn.close()
+    def query_db(self, query):
+        self.cur.execute(query)
+        result = self.cur.fetchall()
+        
+        return result
+    
+    def close(self):
+        self.cur.close()
+        self.conn.close()
 
 def replace_nth(string, old, new, n):
 	index_of_occurrence = string.find(old)
