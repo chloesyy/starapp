@@ -18,7 +18,6 @@ class POSTGRES:
 	def __init__(self):
 		self.conn = self.get_db_connection()
 		self.cur = self.conn.cursor()
-		# self.options = self.get_options()
 			
 	def get_db_connection(self):
 		if IS_PROD:
@@ -41,15 +40,6 @@ class POSTGRES:
 		result = self.cur.fetchall()
 		
 		return result
-
-	# def get_options(self):
-	# 	options = {"date_dim": ["Daily", "Weekly", "Monthly"]}
-	# 	pairs = (('genre_1', 'show_dim'), ('plan_type', 'mem_dim'), ('country_name', 'loc_dim'))
-	# 	for pair in pairs:
-	# 		output = sorted(list(sum(pg.query_db(f'SELECT DISTINCT {pair[0]} FROM {pair[1]};'), ())))
-	# 		output.insert(0, 'ALL')
-	# 		options[pair[1]] = output
-	# 	return options
 			
 	def close(self):
 		self.cur.close()
