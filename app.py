@@ -23,7 +23,6 @@ class POSTGRES:
             print("IN PRODUCTION")
             DATABASE_URL = os.environ['DATABASE_URL']
             conn = psycopg2.connect(DATABASE_URL, sslmode='require')
-            pass
         else:
             # Connect to postgres
             conn = psycopg2.connect(
