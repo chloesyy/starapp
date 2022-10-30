@@ -77,6 +77,52 @@ viewership_fact = {
 	'title': 'Viewership Trend'
 }
 
+######################## CATEGORICAL DATA ########################
+categorical_selection = {
+    'period': 'Past 7 Days',
+    'y_axis': 'Views',
+    'x_axis': 'Genre'
+ 
+}
+
+categorical_options = {
+    'period': ['Past 7 Days', 'Past 30 Days', 'Past 1 Quarter', 'Past 6 Months', 'Past 1 Year'],
+    'y_axis': ['Views', 'Viewing Duration'],
+    'x_axis': ['Genre', 'Country', 'Plan']
+}
+
+categorical_query = {
+    'period': ['7 days', '30 days', '3 months', '6 months', '1 year'],
+    'y_axis': ['COUNT(*)', 'SUM(f.view_duration)'],
+    'x_axis': [
+        {
+            'key': 'show_key',
+            'column': 'genre_1',
+            'name': 'genre',
+            'table': 'show_dim'
+        },
+        {
+            'key': 'loc_key',
+            'column': 'country_name',
+            'name': 'country',
+            'table': 'loc_dim'
+        },
+        {
+            'key': 'mem_key',
+            'column': 'plan_type',
+            'name': 'plan',
+            'table': 'mem_dim'
+        },
+    ]
+}
+
+categorical_data = {
+    'labels': None,
+    'data': None,
+    'label': 'Categorical',         # TODO: Should be y_axis
+    'title': 'Categorical Chart'    # TODO: Should be y_axis per x_axis
+}
+
 @app.route("/", methods=['GET', 'POST'])
 def insights():
     global selection
@@ -179,53 +225,33 @@ def viewership():
 
 @app.route("/categorical", methods=['GET', 'POST'])
 def categorical():
-    global selection
+    global categorical_selection, categorical_query
+    period = categorical_query['period'][0]
+    y_axis = categorical_query['y_axis'][0]
+    x_axis = categorical_query['x_axis'][0]
     if request.method == 'POST':
-        # read user's dropdown input
-        if request.form.get("submit-button") == "Submit":
-            selection['period'] = request.form['period']; selection['genre'] = request.form['genre']; selection['country'] = request.form['country']; selection['plan'] = request.form['plan']
-            query = 'SELECT d1.date, SUM(f.view_duration) FROM viewership_fact f, date_dim d1, loc_dim d2, mem_dim d3, show_dim d4 WHERE f.date_key = d1.date_key AND f.loc_key = d2.loc_key AND f.mem_key = d3.mem_key AND f.show_key = d4.show_key GROUP BY d1.date ORDER BY d1.date DESC;'
-            if selection['genre'] != 'all':
-                query_one, query_three = query.split('GROUP BY')[0], ' GROUP BY' + query.split('GROUP BY')[1]
-                query_two = f"AND d4.genre_1 = \'{selection['genre'].title()}\'"
-                query = query_one + query_two + query_three
-            elif selection['country'] != 'all': 
-                query_one, query_three = query.split('GROUP BY')[0], ' GROUP BY' + query.split('GROUP BY')[1]
-                query_two = f"AND d2.country_name = \'{selection['country'].title()}\'"
-                query = query_one + query_two + query_three       
-            elif selection['plan'] != 'all':
-                query_one, query_three = query.split('GROUP BY')[0], ' GROUP BY' + query.split('GROUP BY')[1]
-                query_two = f"AND d3.plan_type = \'{selection['plan'].title()}\'"
-                query = query_one + query_two + query_three   
-                        
-            # elif selection['period'] == 'monthly':
-            #     query = replace_nth(query, 'd1.date', '(d1.month, d1.year)', 4)
-            #     query = replace_nth(query, 'd1.date', '(d1.month, d1.year)', 3)
-            #     query = replace_nth(query, 'd1.date', 'd1.month, d1.year', 1)
-            #     print(query)
-                
-            views = list(map(list, zip(*pg.query_db(query))))
-
-            if not views:
-                viewership_fact["labels"] = []
-                viewership_fact["data"] = []
-                return render_template('categorical.html', data=viewership_fact, selection=selection, options=options)
-
-            if len(views[0]) >= 30: # if series is more than 30, Chart.js will truncate the dates
-                viewership_fact["labels"] = [datetime.datetime.strftime(i, "%d/%m/%Y") for i in views[0]][:30][::-1]
-                viewership_fact["data"] = views[1][:30][::-1]
-
-            else:
-                viewership_fact["labels"] = [datetime.datetime.strftime(i, "%d/%m/%Y") for i in views[0]][::-1]
-                viewership_fact["data"] = views[1][::-1]
-
-    else:
-        query = 'SELECT d1.date, SUM(f.view_duration) FROM viewership_fact f, date_dim d1  WHERE f.date_key = d1.date_key GROUP BY d1.date ORDER BY d1.date DESC;'
-        views = list(map(list, zip(*pg.query_db(query))))
-        viewership_fact["labels"] = [datetime.datetime.strftime(i, "%d/%m/%Y") for i in views[0]][:30][::-1]
-        viewership_fact["data"] = views[1][:30][::-1]
-    print(selection)
-    return render_template('categorical.html', data=viewership_fact, selection=selection, options=options)
+        if request.form.get('submit-button') == 'Submit':
+            categorical_selection['period'] = request.form['period']
+            categorical_selection['y_axis'] = request.form['y_axis']
+            categorical_selection['x_axis'] = request.form['x_axis']
+            
+            period_index = categorical_options['period'].index(categorical_selection['period'])
+            y_axis_index = categorical_options['y_axis'].index(categorical_selection['y_axis'])
+            x_axis_index = categorical_options['x_axis'].index(categorical_selection['x_axis'])
+            
+            period = categorical_query['period'][period_index]
+            y_axis = categorical_query['y_axis'][y_axis_index]
+            x_axis = categorical_query['x_axis'][x_axis_index]
+        
+    query = f"SELECT d2.{x_axis['column']} AS {x_axis['name']}, {y_axis} AS total FROM viewership_fact f, date_dim d1, {x_axis['table']} d2 WHERE f.date_key = d1.date_key AND f.{x_axis['key']} = d2.{x_axis['key']} AND d1.date >= DATE '2022-10-22' - INTERVAL \'{period}\' GROUP BY {x_axis['column']} ORDER BY total DESC;"
+    views = list(map(list, zip(*pg.query_db(query))))
+    categorical_data["labels"] = views[0]
+    categorical_data["data"] = views[1]
+    categorical_data['label'] = categorical_selection['y_axis']
+    categorical_data['title'] = f"{categorical_selection['y_axis'].title()} per {categorical_selection['x_axis'].title()}"
+    print(categorical_selection)
+    print(categorical_data)
+    return render_template('categorical.html', data=categorical_data, selection=categorical_selection, options=categorical_options)
 
 @app.route("/customquery", methods=['GET', 'POST'])
 def customquery():
