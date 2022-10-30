@@ -13,6 +13,7 @@
         <link rel="stylesheet" href="../static/styles/home.css" />
         <link rel="stylesheet" href="../static/styles/navbar.css" />
         <link rel="stylesheet" href="../static/styles/button.css" />
+        <link rel="stylesheet" href="../static/styles/insights.css" />
         <!-- <link rel="stylesheet" href="../static/styles/scrollbar.css"> -->
 
         <!-- Select2 -->
@@ -27,12 +28,6 @@
         <!-- Chart.js -->
         <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
 
-        <!-- Bootstrap (not used) -->
-        <!-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
-	<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
-	<script src="https://cdn.jsdelivr.net/npm/popper.js@1.12.9/dist/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
-	<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script> -->
-
         <title>Market Analysis</title>
     </head>
     <body>
@@ -43,197 +38,25 @@
                 </div>
                 <div class="toggle">
                     <a href="/" style="margin-right: 40px">Insights</a>
-                    <a href="/viewership" style="margin-right: 40px"
-                        >Viewership</a
-                    >
-                    <a href="/categorical" style="margin-right: 40px"
-                        >Categorical</a
-                    >
+                    <a href="/viewership" style="margin-right: 40px">Viewership</a>
+                    <a href="/categorical" style="margin-right: 40px">Categorical</a>
                     <a href="/customquery">Query</a>
                 </div>
             </div>
             <section id="home">
                 <div class="overlay">
-                    <canvas id="myChart"></canvas>
-                    <div class="parameters">
-                        <form
-                            action="/"
-                            method="POST"
-                            enctype="multipart/form-data"
-                            class="toggle-sensit"
-                        >
-                            <label for="id_label_single" class="dropdown-label"
-                                >Select Period:</label
-                            >
-                            <select
-                                class="js-example-basic-single js-states form-control"
-                                name="period"
-                                id="target1"
-                                style="width: 150px"
-                            >
-                                {% for option in options["date_dim"] %}
-                                console.log({{option}})
-                                <option
-                                    class="tablinks"
-                                    value="{{option.lower()}}"
-                                    id="{{option.lower()}}"
-                                >
-                                    {{option}}
-                                </option>
-                                {% endfor %}
-                            </select>
-                            <br /><br />
-                            <label for="id_label_single" class="dropdown-label"
-                                >Select Genre:</label
-                            >
-                            <select
-                                class="js-example-basic-single js-states form-control"
-                                name="genre"
-                                id="target2"
-                                style="width: 150px"
-                            >
-                                {% for option in options["show_dim"] %}
-                                <option
-                                    class="tablinks"
-                                    value="{{option.lower()}}"
-                                    }
-                                    id="{{option.lower()}}"
-                                >
-                                    {{option}}
-                                </option>
-                                {% endfor %}
-                            </select>
-                            <br /><br />
-                            <label for="id_label_single" class="dropdown-label"
-                                >Select Country:</label
-                            >
-                            <select
-                                class="js-example-basic-single js-states form-control"
-                                name="country"
-                                id="target3"
-                                style="width: 150px"
-                            >
-                                {% for option in options["loc_dim"] %}
-                                <option
-                                    class="tablinks"
-                                    value="{{option.lower()}}"
-                                    id="{{option.lower()}}"
-                                >
-                                    {{option}}
-                                </option>
-                                {% endfor %}
-                            </select>
-                            <br /><br />
-                            <label for="id_label_single" class="dropdown-label"
-                                >Select Plan:</label
-                            >
-                            <select
-                                class="js-example-basic-single js-states form-control"
-                                name="plan"
-                                id="target4"
-                                style="width: 150px"
-                            >
-                                {% for option in options["mem_dim"] %}
-                                <option
-                                    class="tablinks"
-                                    value="{{option.lower()}}"
-                                    id="{{option.lower()}}"
-                                >
-                                    {{option}}
-                                </option>
-                                {% endfor %}
-                            </select>
-                            <br /><br /><br />
-                            <input
-                                type="submit"
-                                class="submit-button"
-                                name="submit-button"
-                                value="Submit"
-                            />
-                        </form>
-                    </div>
+                    <p style="color:white">
+                        In the past month...
+                        <ul>
+                            <li>Customer ID <span>{{data.id}}</span> has the longest viewing duration of <span>{{data.id_duration}}</span> Minutes</li>
+                            <li>Netflix show <span>{{data.title}}</span> is the most viewed title of <span>{{data.title_duration}}</span> Minutes</li>
+                            <li>Genre <span>{{data.genre}}</span> is the most viewed genre of <span>{{data.genre_duration}}</span> Minutes</li>
+                            <li>Age Rating <span>{{data.age_rating}}</span> is the most viewed rating of <span>{{data.age_rating_duration}}</span> Minutes</li>
+                            <li><span>{{data.country}}</span> has the highest duration of Netflix shows watched of <span>{{data.country_duration}}</span> Minutes</li>
+                        </ul>
+                    </p>
                 </div>
             </section>
         </div>
     </body>
-
-    <script>
-         // Chart.js JS
-        // var data = JSON.parse("[" + '{{data.data}}' + "]");
-
-        let myChart = document.getElementById('myChart').getContext('2d');
-        let barChart = new Chart(myChart, {
-        	type: 'line', // bar, horizontalBar, pie, line, doughnut, radar, polarArea
-        	data: {
-        		labels:{{data.labels|tojson}}, // x-axis
-        		datasets:[{
-        			label:'{{data.label}}', // legend name
-        			data:{{data.data|tojson}},
-        			backgroundColor:'#E50914', // can input arrays
-        			borderWidth:2,
-        			borderColor:'white',
-        			hoverBorderWidth:3,
-        		}]
-        	},
-        	options: {
-             plugins: {
-               title:{
-                 display:true,
-                 text:'{{data.title}}',
-                 font: {
-                   size: 20 // default 18
-                 },
-                 padding: {
-                   top:0,
-                   bottom:0
-                 }
-        		  },
-               legend:{
-                 display:true,
-                 position:'right',
-                 labels:{
-        				  fontColor:'#000'
-        			  },
-               },
-               layout:{
-                 padding:{
-                   left:0,
-                   right:0,
-                   bottom:0,
-                   top:0
-                 }
-               },
-               tooltips:{
-                 enabled:true
-               }
-        		},
-           },
-        });
-    </script>
-
-    <script>
-        // Select2 JS
-        $(document).ready(function () {
-            $(".js-example-basic-single").select2({
-                dropdownAutoWidth: false,
-            });
-        });
-    </script>
-
-    <script>
-        // ensures dropdown selection stays after button submit
-        var i, tablinks;
-        // for (i = 1; i < 5; i++) {
-        tablinks = document.getElementsByClassName("tablinks");
-        for (i = 0; i < tablinks.length; i++) {
-            tablinks[i].selected = false;
-        }
-        // }
-        document.getElementById("{{selection.period.lower()}}").selected = true;
-        document.getElementById("{{selection.genre.lower()}}").selected = true;
-        document.getElementById(
-            "{{selection.country.lower()}}"
-        ).selected = true;
-        document.getElementById("{{selection.plan.lower()}}").selected = true;
-    </script>
 </html>
