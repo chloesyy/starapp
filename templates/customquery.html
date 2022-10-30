@@ -97,7 +97,7 @@
                                     class="tablinks"
                                     value="{{option.lower()}}"
                                     }
-                                    id="{{option.lower().replace('&', '').replace(' ', '-')}}"
+                                    id="{{option.lower()}}"
                                 >
                                     {{option}}
                                 </option>
@@ -230,9 +230,7 @@
         }
         // }
         document.getElementById("{{selection.period.lower()}}").selected = true;
-        document.getElementById(
-            "{{selection.genre.lower().replace('&', '').replace(' ', '-')}}"
-        ).selected = true;
+        document.getElementById("{{selection.genre.lower()}}").selected = true;
         document.getElementById(
             "{{selection.country.lower()}}"
         ).selected = true;
