@@ -27,12 +27,6 @@
         <!-- Chart.js -->
         <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
 
-        <!-- Bootstrap (not used) -->
-        <!-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
-	<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
-	<script src="https://cdn.jsdelivr.net/npm/popper.js@1.12.9/dist/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
-	<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script> -->
-
         <title>Market Analysis</title>
     </head>
     <body>
@@ -57,7 +51,7 @@
                     <canvas id="myChart"></canvas>
                     <div class="parameters">
                         <form
-                            action="/"
+                            action="/categorical"
                             method="POST"
                             enctype="multipart/form-data"
                             class="toggle-sensit"
@@ -71,11 +65,11 @@
                                 id="target1"
                                 style="width: 150px"
                             >
-                                {% for option in options["date_dim"] %}
+                                {% for option in options["period"] %}
                                 console.log({{option}})
                                 <option
                                     class="tablinks"
-                                    value="{{option.lower()}}"
+                                    value="{{option}}"
                                     id="{{option.lower()}}"
                                 >
                                     {{option}}
@@ -84,18 +78,18 @@
                             </select>
                             <br /><br />
                             <label for="id_label_single" class="dropdown-label"
-                                >Select Genre:</label
+                                >Select Y Axis:</label
                             >
                             <select
                                 class="js-example-basic-single js-states form-control"
-                                name="genre"
+                                name="y_axis"
                                 id="target2"
                                 style="width: 150px"
                             >
-                                {% for option in options["show_dim"] %}
+                                {% for option in options["y_axis"] %}
                                 <option
                                     class="tablinks"
-                                    value="{{option.lower()}}"
+                                    value="{{option}}"
                                     }
                                     id="{{option.lower()}}"
                                 >
@@ -105,38 +99,18 @@
                             </select>
                             <br /><br />
                             <label for="id_label_single" class="dropdown-label"
-                                >Select Country:</label
+                                >Select X Axis:</label
                             >
                             <select
                                 class="js-example-basic-single js-states form-control"
-                                name="country"
+                                name="x_axis"
                                 id="target3"
                                 style="width: 150px"
                             >
-                                {% for option in options["loc_dim"] %}
+                                {% for option in options["x_axis"] %}
                                 <option
                                     class="tablinks"
-                                    value="{{option.lower()}}"
-                                    id="{{option.lower()}}"
-                                >
-                                    {{option}}
-                                </option>
-                                {% endfor %}
-                            </select>
-                            <br /><br />
-                            <label for="id_label_single" class="dropdown-label"
-                                >Select Plan:</label
-                            >
-                            <select
-                                class="js-example-basic-single js-states form-control"
-                                name="plan"
-                                id="target4"
-                                style="width: 150px"
-                            >
-                                {% for option in options["mem_dim"] %}
-                                <option
-                                    class="tablinks"
-                                    value="{{option.lower()}}"
+                                    value="{{option}}"
                                     id="{{option.lower()}}"
                                 >
                                     {{option}}
@@ -163,15 +137,15 @@
 
         let myChart = document.getElementById('myChart').getContext('2d');
         let barChart = new Chart(myChart, {
-        	type: 'line', // bar, horizontalBar, pie, line, doughnut, radar, polarArea
+        	type: 'bar', // bar, horizontalBar, pie, line, doughnut, radar, polarArea
         	data: {
         		labels:{{data.labels|tojson}}, // x-axis
         		datasets:[{
         			label:'{{data.label}}', // legend name
-        			data:{{data.data|tojson}},
+        			data:{{data.data|tojson}},  // y-axis
         			backgroundColor:'#E50914', // can input arrays
         			borderWidth:2,
-        			borderColor:'white',
+        			// borderColor:'white',
         			hoverBorderWidth:3,
         		}]
         	},
@@ -230,10 +204,7 @@
         }
         // }
         document.getElementById("{{selection.period.lower()}}").selected = true;
-        document.getElementById("{{selection.genre.lower()}}").selected = true;
-        document.getElementById(
-            "{{selection.country.lower()}}"
-        ).selected = true;
-        document.getElementById("{{selection.plan.lower()}}").selected = true;
+        document.getElementById("{{selection.y_axis.lower()}}").selected = true;
+        document.getElementById("{{selection.x_axis.lower()}}").selected = true;
     </script>
 </html>
