@@ -1,5 +1,4 @@
 import os
-from types import NoneType
 from flask import Flask, redirect, render_template, request
 # from flask_sqlalchemy import SQLAlchemy
 import numpy as np
@@ -122,7 +121,7 @@ def home():
 
 			else:
 				viewership_fact["labels"] = [datetime.datetime.strftime(i, "%d/%m/%Y") for i in views[0]][::-1]
-				viewership_fact["data"] = views[1][::-1]           
+				viewership_fact["data"] = views[1][::-1]
 
 			pg.close()
 	else:
@@ -134,6 +133,168 @@ def home():
 		pg.close()
 
 	return render_template('home.html', data=viewership_fact, selection=selection, options=options)
+
+@app.route("/viewership", methods=['GET', 'POST'])
+def viewership():
+	global selection
+	if request.method == 'POST':
+		# read user's dropdown input
+		if request.form.get("submit-button") == "Submit":
+			pg = POSTGRES()
+			selection['period'] = request.form['period']; selection['genre'] = request.form['genre']; selection['country'] = request.form['country']; selection['plan'] = request.form['plan']
+			query = 'SELECT d1.date, SUM(f.view_duration) FROM viewership_fact f, date_dim d1, loc_dim d2, mem_dim d3, show_dim d4 WHERE f.date_key = d1.date_key AND f.loc_key = d2.loc_key AND f.mem_key = d3.mem_key AND f.show_key = d4.show_key GROUP BY d1.date ORDER BY d1.date DESC;'
+			if selection['genre'] != 'all':
+				query_one, query_three = query.split('GROUP BY')[0], ' GROUP BY' + query.split('GROUP BY')[1]
+				query_two = f"AND d4.genre_1 = \'{selection['genre'].title()}\'"
+				query = query_one + query_two + query_three
+			elif selection['country'] != 'all': 
+				query_one, query_three = query.split('GROUP BY')[0], ' GROUP BY' + query.split('GROUP BY')[1]
+				query_two = f"AND d2.country_name = \'{selection['country'].title()}\'"
+				query = query_one + query_two + query_three       
+			elif selection['plan'] != 'all':
+				query_one, query_three = query.split('GROUP BY')[0], ' GROUP BY' + query.split('GROUP BY')[1]
+				query_two = f"AND d3.plan_type = \'{selection['plan'].title()}\'"
+				query = query_one + query_two + query_three   
+				      
+			# elif selection['period'] == 'monthly':
+			#     query = replace_nth(query, 'd1.date', '(d1.month, d1.year)', 4)
+			#     query = replace_nth(query, 'd1.date', '(d1.month, d1.year)', 3)
+			#     query = replace_nth(query, 'd1.date', 'd1.month, d1.year', 1)
+			#     print(query)
+				
+			views = list(map(list, zip(*pg.query_db(query))))
+
+			if not views:
+				viewership_fact["labels"] = []
+				viewership_fact["data"] = []
+				return render_template('home.html', data=viewership_fact, selection=selection, options=options)
+
+			if len(views[0]) >= 30: # if series is more than 30, Chart.js will truncate the dates
+				viewership_fact["labels"] = [datetime.datetime.strftime(i, "%d/%m/%Y") for i in views[0]][:30][::-1]
+				viewership_fact["data"] = views[1][:30][::-1]
+
+			else:
+				viewership_fact["labels"] = [datetime.datetime.strftime(i, "%d/%m/%Y") for i in views[0]][::-1]
+				viewership_fact["data"] = views[1][::-1]
+
+			pg.close()
+	else:
+		pg = POSTGRES()
+		query = 'SELECT d1.date, SUM(f.view_duration) FROM viewership_fact f, date_dim d1  WHERE f.date_key = d1.date_key GROUP BY d1.date ORDER BY d1.date DESC;'
+		views = list(map(list, zip(*pg.query_db(query))))
+		viewership_fact["labels"] = [datetime.datetime.strftime(i, "%d/%m/%Y") for i in views[0]][:30][::-1]
+		viewership_fact["data"] = views[1][:30][::-1]
+		pg.close()
+
+	return render_template('viewership.html', data=viewership_fact, selection=selection, options=options)
+
+@app.route("/categorical", methods=['GET', 'POST'])
+def categorical():
+	global selection
+	if request.method == 'POST':
+		# read user's dropdown input
+		if request.form.get("submit-button") == "Submit":
+			pg = POSTGRES()
+			selection['period'] = request.form['period']; selection['genre'] = request.form['genre']; selection['country'] = request.form['country']; selection['plan'] = request.form['plan']
+			query = 'SELECT d1.date, SUM(f.view_duration) FROM viewership_fact f, date_dim d1, loc_dim d2, mem_dim d3, show_dim d4 WHERE f.date_key = d1.date_key AND f.loc_key = d2.loc_key AND f.mem_key = d3.mem_key AND f.show_key = d4.show_key GROUP BY d1.date ORDER BY d1.date DESC;'
+			if selection['genre'] != 'all':
+				query_one, query_three = query.split('GROUP BY')[0], ' GROUP BY' + query.split('GROUP BY')[1]
+				query_two = f"AND d4.genre_1 = \'{selection['genre'].title()}\'"
+				query = query_one + query_two + query_three
+			elif selection['country'] != 'all': 
+				query_one, query_three = query.split('GROUP BY')[0], ' GROUP BY' + query.split('GROUP BY')[1]
+				query_two = f"AND d2.country_name = \'{selection['country'].title()}\'"
+				query = query_one + query_two + query_three       
+			elif selection['plan'] != 'all':
+				query_one, query_three = query.split('GROUP BY')[0], ' GROUP BY' + query.split('GROUP BY')[1]
+				query_two = f"AND d3.plan_type = \'{selection['plan'].title()}\'"
+				query = query_one + query_two + query_three   
+				      
+			# elif selection['period'] == 'monthly':
+			#     query = replace_nth(query, 'd1.date', '(d1.month, d1.year)', 4)
+			#     query = replace_nth(query, 'd1.date', '(d1.month, d1.year)', 3)
+			#     query = replace_nth(query, 'd1.date', 'd1.month, d1.year', 1)
+			#     print(query)
+				
+			views = list(map(list, zip(*pg.query_db(query))))
+
+			if not views:
+				viewership_fact["labels"] = []
+				viewership_fact["data"] = []
+				return render_template('home.html', data=viewership_fact, selection=selection, options=options)
+
+			if len(views[0]) >= 30: # if series is more than 30, Chart.js will truncate the dates
+				viewership_fact["labels"] = [datetime.datetime.strftime(i, "%d/%m/%Y") for i in views[0]][:30][::-1]
+				viewership_fact["data"] = views[1][:30][::-1]
+
+			else:
+				viewership_fact["labels"] = [datetime.datetime.strftime(i, "%d/%m/%Y") for i in views[0]][::-1]
+				viewership_fact["data"] = views[1][::-1]
+
+			pg.close()
+	else:
+		pg = POSTGRES()
+		query = 'SELECT d1.date, SUM(f.view_duration) FROM viewership_fact f, date_dim d1  WHERE f.date_key = d1.date_key GROUP BY d1.date ORDER BY d1.date DESC;'
+		views = list(map(list, zip(*pg.query_db(query))))
+		viewership_fact["labels"] = [datetime.datetime.strftime(i, "%d/%m/%Y") for i in views[0]][:30][::-1]
+		viewership_fact["data"] = views[1][:30][::-1]
+		pg.close()
+
+	return render_template('categorical.html', data=viewership_fact, selection=selection, options=options)
+
+@app.route("/customquery", methods=['GET', 'POST'])
+def customquery():
+	global selection
+	if request.method == 'POST':
+		# read user's dropdown input
+		if request.form.get("submit-button") == "Submit":
+			pg = POSTGRES()
+			selection['period'] = request.form['period']; selection['genre'] = request.form['genre']; selection['country'] = request.form['country']; selection['plan'] = request.form['plan']
+			query = 'SELECT d1.date, SUM(f.view_duration) FROM viewership_fact f, date_dim d1, loc_dim d2, mem_dim d3, show_dim d4 WHERE f.date_key = d1.date_key AND f.loc_key = d2.loc_key AND f.mem_key = d3.mem_key AND f.show_key = d4.show_key GROUP BY d1.date ORDER BY d1.date DESC;'
+			if selection['genre'] != 'all':
+				query_one, query_three = query.split('GROUP BY')[0], ' GROUP BY' + query.split('GROUP BY')[1]
+				query_two = f"AND d4.genre_1 = \'{selection['genre'].title()}\'"
+				query = query_one + query_two + query_three
+			elif selection['country'] != 'all': 
+				query_one, query_three = query.split('GROUP BY')[0], ' GROUP BY' + query.split('GROUP BY')[1]
+				query_two = f"AND d2.country_name = \'{selection['country'].title()}\'"
+				query = query_one + query_two + query_three       
+			elif selection['plan'] != 'all':
+				query_one, query_three = query.split('GROUP BY')[0], ' GROUP BY' + query.split('GROUP BY')[1]
+				query_two = f"AND d3.plan_type = \'{selection['plan'].title()}\'"
+				query = query_one + query_two + query_three   
+				      
+			# elif selection['period'] == 'monthly':
+			#     query = replace_nth(query, 'd1.date', '(d1.month, d1.year)', 4)
+			#     query = replace_nth(query, 'd1.date', '(d1.month, d1.year)', 3)
+			#     query = replace_nth(query, 'd1.date', 'd1.month, d1.year', 1)
+			#     print(query)
+				
+			views = list(map(list, zip(*pg.query_db(query))))
+
+			if not views:
+				viewership_fact["labels"] = []
+				viewership_fact["data"] = []
+				return render_template('home.html', data=viewership_fact, selection=selection, options=options)
+
+			if len(views[0]) >= 30: # if series is more than 30, Chart.js will truncate the dates
+				viewership_fact["labels"] = [datetime.datetime.strftime(i, "%d/%m/%Y") for i in views[0]][:30][::-1]
+				viewership_fact["data"] = views[1][:30][::-1]
+
+			else:
+				viewership_fact["labels"] = [datetime.datetime.strftime(i, "%d/%m/%Y") for i in views[0]][::-1]
+				viewership_fact["data"] = views[1][::-1]
+
+			pg.close()
+	else:
+		pg = POSTGRES()
+		query = 'SELECT d1.date, SUM(f.view_duration) FROM viewership_fact f, date_dim d1  WHERE f.date_key = d1.date_key GROUP BY d1.date ORDER BY d1.date DESC;'
+		views = list(map(list, zip(*pg.query_db(query))))
+		viewership_fact["labels"] = [datetime.datetime.strftime(i, "%d/%m/%Y") for i in views[0]][:30][::-1]
+		viewership_fact["data"] = views[1][:30][::-1]
+		pg.close()
+
+	return render_template('customquery.html', data=viewership_fact, selection=selection, options=options)
 
 if __name__ == "__main__":
 	app.run(debug=True)
