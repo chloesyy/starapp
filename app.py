@@ -88,7 +88,7 @@ categorical_selection = {
 categorical_options = {
     'period': ['Past 7 Days', 'Past 30 Days', 'Past 1 Quarter', 'Past 6 Months', 'Past 1 Year'],
     'y_axis': ['Views', 'Viewing Duration'],
-    'x_axis': ['Genre', 'Country', 'Plan']
+    'x_axis': ['Genre', 'Movie', 'Country', 'Director', 'Plan']
 }
 
 categorical_query = {
@@ -102,10 +102,22 @@ categorical_query = {
             'table': 'show_dim'
         },
         {
+            'key': 'show_key',
+            'column': 'title',
+            'name': 'movie',
+            'table': 'show_dim'
+        },
+        {
             'key': 'loc_key',
             'column': 'country_name',
             'name': 'country',
             'table': 'loc_dim'
+        },
+        {
+            'key': 'show_key',
+            'column': 'director',
+            'name': 'director',
+            'table': 'show_dim'
         },
         {
             'key': 'mem_key',
@@ -249,8 +261,6 @@ def categorical():
     categorical_data["data"] = views[1]
     categorical_data['label'] = categorical_selection['y_axis']
     categorical_data['title'] = f"{categorical_selection['y_axis'].title()} per {categorical_selection['x_axis'].title()}"
-    print(categorical_selection)
-    print(categorical_data)
     return render_template('categorical.html', data=categorical_data, selection=categorical_selection, options=categorical_options)
 
 @app.route("/customquery", methods=['GET', 'POST'])
