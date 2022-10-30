@@ -166,23 +166,29 @@ def insights():
 @app.route("/viewership", methods=['GET', 'POST'])
 def viewership():
     global selection
+    query = None
     if request.method == 'POST':
         if request.form.get("submit-button") == "Submit":
-            selection['period'] = request.form['period']; selection['genre'] = request.form['genre']; selection['country'] = request.form['country']; selection['plan'] = request.form['plan']
+            selection['period'] = request.form['period']
+            selection['genre'] = request.form['genre']
+            selection['country'] = request.form['country']
+            selection['plan'] = request.form['plan']
             query = 'SELECT d1.date, SUM(f.view_duration) FROM viewership_fact f, date_dim d1, loc_dim d2, mem_dim d3, show_dim d4 WHERE f.date_key = d1.date_key AND f.loc_key = d2.loc_key AND f.mem_key = d3.mem_key AND f.show_key = d4.show_key GROUP BY d1.date ORDER BY d1.date DESC;'
+            query_one, query_three = query.split('GROUP BY')[0], ' GROUP BY' + query.split('GROUP BY')[1]
+            query_two = ""
             if selection['genre'] != 'all':
-                query_one, query_three = query.split('GROUP BY')[0], ' GROUP BY' + query.split('GROUP BY')[1]
-                query_two = f"AND d4.genre_1 = \'{selection['genre'].title()}\'"
-                query = query_one + query_two + query_three
-            elif selection['country'] != 'all': 
-                query_one, query_three = query.split('GROUP BY')[0], ' GROUP BY' + query.split('GROUP BY')[1]
-                query_two = f"AND d2.country_name = \'{selection['country'].title()}\'"
-                query = query_one + query_two + query_three       
-            elif selection['plan'] != 'all':
-                query_one, query_three = query.split('GROUP BY')[0], ' GROUP BY' + query.split('GROUP BY')[1]
-                query_two = f"AND d3.plan_type = \'{selection['plan'].title()}\'"
-                query = query_one + query_two + query_three   
-                
+                query_two = query_two + f"AND d4.genre_1 = \'{selection['genre'].title()}\'"
+            if selection['country'] != 'all': 
+                query_two = query_two + f"AND d2.country_name = \'{selection['country'].title()}\'"
+            if selection['plan'] != 'all':
+                query_two = query_two + f"AND d3.plan_type = \'{selection['plan'].title()}\'"
+            # elif selection['period'] == 'monthly':
+            #     query = replace_nth(query, 'd1.date', '(d1.month, d1.year)', 4)
+            #     query = replace_nth(query, 'd1.date', '(d1.month, d1.year)', 3)
+            #     query = replace_nth(query, 'd1.date', 'd1.month, d1.year', 1)
+            #     print(query)
+                  
+            query = query_one + query_two + query_three
             views = list(map(list, zip(*pg.query_db(query))))
 
             if not views:
@@ -203,7 +209,9 @@ def viewership():
         views = list(map(list, zip(*pg.query_db(query))))
         viewership_fact["labels"] = [datetime.datetime.strftime(i, "%d/%m/%Y") for i in views[0]][:30][::-1]
         viewership_fact["data"] = views[1][:30][::-1]
-
+    print(selection)
+    print(query)
+    print(options['show_dim'])
     return render_template('viewership.html', data=viewership_fact, selection=selection, options=options)
 
 @app.route("/categorical", methods=['GET', 'POST'])
