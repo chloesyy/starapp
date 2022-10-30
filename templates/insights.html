@@ -95,7 +95,7 @@
                                 {% for option in options["show_dim"] %}
                                 <option
                                     class="tablinks"
-                                    value="{{option.lower()}}"
+                                    value="{{option.lower().replace('&', '').replace(' ', '-')}}"
                                     }
                                     id="{{option.lower().replace('&', '').replace(' ', '-')}}"
                                 >
