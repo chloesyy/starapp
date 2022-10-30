@@ -131,8 +131,8 @@ categorical_query = {
 categorical_data = {
     'labels': None,
     'data': None,
-    'label': 'Categorical',         # TODO: Should be y_axis
-    'title': 'Categorical Chart'    # TODO: Should be y_axis per x_axis
+    'label': 'Categorical',
+    'title': 'Categorical Chart'
 }
 
 ######################## INSIGHTS DATA ########################
@@ -182,11 +182,7 @@ def viewership():
                 query_two = query_two + f"AND d2.country_name = \'{selection['country'].title()}\'"
             if selection['plan'] != 'all':
                 query_two = query_two + f"AND d3.plan_type = \'{selection['plan'].title()}\'"
-            # elif selection['period'] == 'monthly':
-            #     query = replace_nth(query, 'd1.date', '(d1.month, d1.year)', 4)
-            #     query = replace_nth(query, 'd1.date', '(d1.month, d1.year)', 3)
-            #     query = replace_nth(query, 'd1.date', 'd1.month, d1.year', 1)
-            #     print(query)
+            # TODO: add query for time period
                   
             query = query_one + query_two + query_three
             views = list(map(list, zip(*pg.query_db(query))))
