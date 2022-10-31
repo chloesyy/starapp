@@ -1,0 +1,71 @@
+input {
+    margin: 0;
+    margin-right: 0.25rem;
+}
+
+.page-container {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.page-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 36px;
+    color: white;
+}
+
+.toggle-sensit {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.select-container {
+    display: flex;
+    flex-direction: row;
+    gap: 1rem;
+}
+
+.select-box {
+    color: white;
+    display: flex;
+    flex-direction: column;
+    text-align: left;
+    width: 150px;
+}
+
+.select-box-sm {
+    width: 80px;
+}
+
+.select-box h1 {
+    font-family: 'Bebas Neue', sans-serif;
+    margin: 0;
+    margin-bottom: .5rem;
+}
+
+.checkboxes {
+    background: white;
+    display: flex;
+    flex-direction: column;
+    color: black;
+    overflow-y: auto;
+    overflow-x: hidden;
+    height: 100px;
+}
+
+.checkboxes label {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    padding: .25rem .25rem;
+}
+
+.radio-buttons label {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    padding: .25rem .25rem;
+}

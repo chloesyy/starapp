@@ -1,6 +1,9 @@
 import os
-from flask import Flask, redirect, render_template, request
+from flask import Flask, make_response, render_template, request
+from matplotlib.pyplot import table
 # from flask_sqlalchemy import SQLAlchemy
+import io
+import csv
 import numpy as np
 import random
 import json
@@ -68,7 +71,6 @@ for pair in pairs:
 	output = sorted(list(sum(pg.query_db(f'SELECT DISTINCT {pair[0]} FROM {pair[1]};'), ())))
 	output.insert(0, 'ALL')
 	options[pair[1]] = output
-
 
 viewership_fact = {
 	'labels': None,
@@ -155,6 +157,30 @@ insights_query = {
 	'update_data': [('id', 'id_duration'), ('title', 'title_duration'), ('genre', 'genre_duration'), ('age_rating', 'age_rating_duration'), ('country', 'country_duration')]
 }
 
+######################## QUERY DATA ########################
+custom_query_options = {'date_dim' : ['7 days', '30 days', '3 months', '6 months', '1 year']}
+for pair in pairs:
+	output = sorted(list(sum(pg.query_db(f'SELECT DISTINCT {pair[0]} FROM {pair[1]};'), ())))
+	output.insert(0, 'ALL')
+	custom_query_options[pair[1]] = output
+
+custom_query_default = {
+    'period':['1 year'], 
+    'genre':['ALL'], 
+    'country':['ALL'], 
+    'plan':['ALL'],
+    'sort_by':['period'],
+    'sort':['asc']}
+
+## table, selection, join_conditions are all fixed
+custom_query_query = {
+    'table': ['show_dim d1', 'loc_dim d2', 'mem_dim d3', 'date_dim d4', 'viewership_fact f'],
+    'selection': ['d4.date','d1.genre_1', 'd2.country_name', 'd3.plan_type', 'f.view_duration'],
+    'join_conditions': ['f.show_key = d1.show_key', 'f.loc_key = d2.loc_key', 'f.mem_key = d3.mem_key', 'f.date_key = d4.date_key'],
+    'filter': {'genre':'d1.genre_1', 'country':'d2.country_name', 'plan':'d3.plan_type', 'period':'d4.date'},
+    'csv_header': ['date', 'genre', 'country', 'plan_type', 'view_duration_mins']
+}
+
 @app.route("/", methods=['GET', 'POST'])
 def insights():
 	for selection_index in range(len(insights_query['selection'])):
@@ -183,6 +209,8 @@ def viewership():
             if selection['plan'] != 'all':
                 query_two = query_two + f"AND d3.plan_type = \'{selection['plan'].title()}\'"
             # TODO: add query for time period
+            if selection['plan'] != 'all':
+                query_two = query_two + f"AND d1.plan_type = \'{selection['plan'].title()}\'"
                   
             query = query_one + query_two + query_three
             views = list(map(list, zip(*pg.query_db(query))))
@@ -207,7 +235,7 @@ def viewership():
         viewership_fact["data"] = views[1][:30][::-1]
     print(selection)
     print(query)
-    print(options['show_dim'])
+    print(options)
     return render_template('viewership.html', data=viewership_fact, selection=selection, options=options)
 
 @app.route("/categorical", methods=['GET', 'POST'])
@@ -229,7 +257,6 @@ def categorical():
             period = categorical_query['period'][period_index]
             y_axis = categorical_query['y_axis'][y_axis_index]
             x_axis = categorical_query['x_axis'][x_axis_index]
-        
     query = f"SELECT d2.{x_axis['column']} AS {x_axis['name']}, {y_axis} AS total FROM viewership_fact f, date_dim d1, {x_axis['table']} d2 WHERE f.date_key = d1.date_key AND f.{x_axis['key']} = d2.{x_axis['key']} AND d1.date >= DATE '2022-10-22' - INTERVAL \'{period}\' GROUP BY {x_axis['column']} ORDER BY total DESC;"
     views = list(map(list, zip(*pg.query_db(query))))
     categorical_data["labels"] = views[0]
@@ -240,7 +267,101 @@ def categorical():
 
 @app.route("/customquery", methods=['GET', 'POST'])
 def customquery():
-    return render_template('customquery.html')
+    if request.method == 'POST':
+        if request.form.get("submit-button") == "Query Data":
+            filter_list = []
+            sort_string = ''
+            sort_by_string = ''
+            for col_key, default_val in custom_query_default.items():
+                filters_val = []
+                formatted_filter = ''
+                if not request.form.getlist(col_key):
+                    filters_val= default_val
+                else:
+                    filters_val = request.form.getlist(col_key)
+
+                if not col_key in custom_query_query['filter']:
+                    ## These are sortby and sort
+                    if col_key == 'sort_by':
+                        sort_by_string = custom_query_query['filter'][filters_val[0]]
+                    elif col_key == 'sort':
+                        sort_string = filters_val[0]
+                    continue
+
+                ## Selection
+                table_col = custom_query_query['filter'][col_key]
+
+                ## Accounting for period
+                if col_key == 'period':
+                    formatted_filter = f"{table_col} >= DATE '2022-10-22' - INTERVAL \'{filters_val[0]}\'"                  
+                    filter_list.append(formatted_filter)
+                    continue
+
+                if type(filters_val) == list:
+                    if 'ALL' in filters_val:
+                        continue
+                    else:
+                        if len(filters_val) == 1:
+                            ## to deal with kids' tv >:( apostrophe throws error
+                            if filters_val[0].find('\'') != -1:
+                                filters_val[0] = filters_val[0].replace('\'','\'\'')
+                            ## Initial usage for genre_1 to genre_3 Deprecated use as hard to generalise print genre_1 columns
+                            if type(table_col) == list:
+                                for t_col in table_col[:-1]:
+                                    formatted_filter += f"{t_col} = \'{filters_val[0]}\'"
+                                    formatted_filter += " OR "
+                                formatted_filter += f"{table_col[-1]} = \'{filters_val[0]}\'" 
+                                formatted_filter = "("+formatted_filter+")"
+                            else:
+                                formatted_filter = f"{table_col} = \'{filters_val[0]}\'"
+                        else:
+                            for i in range(len(filters_val)):
+                                if filters_val[i].find('\'') != -1:
+                                    filters_val[i] = filters_val[i].replace('\'','\'\'')
+                            filters_val = str(tuple(filters_val)).replace("\"","\'")
+                            ## Initial usage for genre_1 to genre_3 Deprecated use as hard to generalise print genre_1 columns
+                            if type(table_col) == list:
+                                for t_col in table_col[:-1]:
+                                    formatted_filter += f"{t_col} IN {filters_val}"
+                                    formatted_filter += " OR "
+                                formatted_filter += f"{table_col[-1]} IN {filters_val}" 
+                                formatted_filter = "("+formatted_filter+")"
+                            else:
+                                formatted_filter = f"{table_col} IN {filters_val}"
+
+                        filter_list.append(formatted_filter)
+                else:
+                    print("Error with type received from drop down")
+
+            ## Querying DB
+            table_string = ', '.join(str(val) for val in custom_query_query['table'])
+            selection_string = ', '.join(str(val) for val in custom_query_query['selection'])
+            join_string = " and ".join(str(val) for val in custom_query_query['join_conditions'])
+            filter_string = " and ".join(str(val) for val in filter_list)
+
+            query = f"SELECT {selection_string} FROM {table_string} WHERE {join_string} AND {filter_string} ORDER BY {sort_by_string} {sort_string};"
+            output = pg.query_db(query)
+            print(query)
+
+            ## Writing Files
+            file_name = "result.csv"
+            csv_file = [custom_query_query['csv_header']]
+            for row in output:
+                tmp = [str(row_string) for row_string in row] 
+                csv_file.append(tmp)
+
+            dest = io.StringIO()
+            writer = csv.writer(dest)
+            for row in csv_file:
+                writer.writerow(row)
+            
+            response = make_response(dest.getvalue())
+            cd = "attachment; filename="+file_name
+            response.headers['Content-Disposition'] = cd
+            response.mimetype="test/csv"
+            return response
+    else:
+        return render_template('customquery.html', options=custom_query_options)
 
 if __name__ == "__main__":
     app.run(debug=True)
