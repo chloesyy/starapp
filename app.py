@@ -1,6 +1,5 @@
 import os
 from flask import Flask, make_response, render_template, request
-from matplotlib.pyplot import table
 # from flask_sqlalchemy import SQLAlchemy
 import io
 import csv
