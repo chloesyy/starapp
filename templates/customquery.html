@@ -145,11 +145,17 @@
               type="submit"
               class="submit-button"
               name="submit-button"
-              value="Query Data"
+              value="Query"
             />
+            {% for message in get_flashed_messages()%}
+            <div class="alert"> 
+                {{message}}
+            </div>
+            {% endfor %}
           </form>
         </div>
       </section>
     </div>
+    <div>
   </body>
 </html>

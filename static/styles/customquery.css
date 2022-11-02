@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Poppins&family=Roboto&display=swap');
+
 input {
     margin: 0;
     margin-right: 0.25rem;
@@ -68,4 +70,10 @@ input {
     display: flex;
     flex-direction: row;
     padding: .25rem .25rem;
+}
+
+.alert {
+    color: #E50914;
+    font-family: 'Roboto', sans-serif;
+    font-size: 12px;
 }

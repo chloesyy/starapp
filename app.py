@@ -1,5 +1,5 @@
 import os
-from flask import Flask, make_response, render_template, request
+from flask import Flask, flash, make_response, redirect, render_template, request, url_for
 # from flask_sqlalchemy import SQLAlchemy
 import io
 import csv
@@ -10,6 +10,8 @@ import psycopg2
 import datetime
 
 app = Flask(__name__)
+# random key set for flask flash to work
+app.secret_key = b'_5#y2L"F4Q8z\n\xec]/'
 
 IS_PROD = os.environ.get('IS_HEROKU', None)
 if not IS_PROD:
@@ -76,6 +78,13 @@ viewership_fact = {
 	'data': None,
 	'label': 'Viewership',
 	'title': 'Viewership Trend'
+}
+
+viewership_period_dict = { 
+    "daily":"date", 
+    "weekly": "week", 
+    "monthly":"month",
+    "quarterly" : "quarter"
 }
 
 ######################## CATEGORICAL DATA ########################
@@ -207,34 +216,55 @@ def viewership():
                 query_two = query_two + f"AND d2.country_name = \'{selection['country'].title()}\'"
             if selection['plan'] != 'all':
                 query_two = query_two + f"AND d3.plan_type = \'{selection['plan'].title()}\'"
-            # TODO: add query for time period
-            if selection['plan'] != 'all':
-                query_two = query_two + f"AND d1.plan_type = \'{selection['plan'].title()}\'"
+            # TODO: WEEKLY RETURNS INT WHILE DAILY RETUNRNS DATE
+            if selection['period'] != 'all':
+                q1_1, q1_2 = query_one.split("d1.date",1)
+                sql_col = "d1."+viewership_period_dict[selection['period']] 
+                q1_1 += sql_col
+                query_one = q1_1 + q1_2
+                # viewership_period_dict[selection['period']] maps html input to sql table col
+                query_three = "GROUP BY " + sql_col
+                query_three += " ORDER BY "+ sql_col + " ASC"
                   
             query = query_one + query_two + query_three
             views = list(map(list, zip(*pg.query_db(query))))
-
             if not views:
                 viewership_fact["labels"] = []
                 viewership_fact["data"] = []
                 return render_template('viewership.html', data=viewership_fact, selection=selection, options=options)
-
-            if len(views[0]) >= 30: # if series is more than 30, Chart.js will truncate the dates
-                viewership_fact["labels"] = [datetime.datetime.strftime(i, "%d/%m/%Y") for i in views[0]][:30][::-1]
-                viewership_fact["data"] = views[1][:30][::-1]
+            
+            allowable_chart_size = 60
+            if len(views[0]) >= allowable_chart_size: # if series is more than 30, Chart.js will truncate the dates
+                if type(views[0][0]) == int:
+                    step  = len(views[0])//allowable_chart_size
+                    viewership_fact["labels"] = [i for i in views[0]][::step]
+                    viewership_fact["data"] = views[1][::step]
+                else:
+                    step  = len(views[0])//allowable_chart_size
+                    # Suggested way?
+                    viewership_fact["labels"] = [datetime.datetime.strftime(i, "%d/%m/%Y") for i in views[0]][::step]
+                    viewership_fact["data"] = views[1][::step]
+                    #viewership_fact["labels"] = [datetime.datetime.strftime(i, "%d/%m/%Y") for i in views[0]][:30][::1]
+                    #viewership_fact["data"] = views[1][:30][::1]
 
             else:
-                viewership_fact["labels"] = [datetime.datetime.strftime(i, "%d/%m/%Y") for i in views[0]][::-1]
-                viewership_fact["data"] = views[1][::-1]
+                if type(views[0][0]) == int:
+                    viewership_fact["labels"] = [i for i in views[0]][::1]  
+                    viewership_fact["data"] = views[1][::1]                  
+                else:
+                    viewership_fact["labels"] = [datetime.datetime.strftime(i, "%d/%m/%Y") for i in views[0]][::1]
+                    viewership_fact["data"] = views[1][::1]
+            
+           #print(viewership_fact)
 
     else:
         query = 'SELECT d1.date, SUM(f.view_duration) FROM viewership_fact f, date_dim d1  WHERE f.date_key = d1.date_key GROUP BY d1.date ORDER BY d1.date DESC;'
         views = list(map(list, zip(*pg.query_db(query))))
         viewership_fact["labels"] = [datetime.datetime.strftime(i, "%d/%m/%Y") for i in views[0]][:30][::-1]
         viewership_fact["data"] = views[1][:30][::-1]
-    print(selection)
-    print(query)
-    print(options)
+    #print(selection)
+    #print(query)
+    #print(options)
     return render_template('viewership.html', data=viewership_fact, selection=selection, options=options)
 
 @app.route("/categorical", methods=['GET', 'POST'])
@@ -267,7 +297,7 @@ def categorical():
 @app.route("/customquery", methods=['GET', 'POST'])
 def customquery():
     if request.method == 'POST':
-        if request.form.get("submit-button") == "Query Data":
+        if request.form.get("submit-button") == "Query":
             filter_list = []
             sort_string = ''
             sort_by_string = ''
@@ -325,6 +355,12 @@ def customquery():
             output = pg.query_db(query)
             print(query)
 
+            if len(output) == 0:
+                print("this is output:" , output)
+                flash('No data found for query!')
+                return render_template('customquery.html', options=custom_query_options)
+                #return redirect(url_for('customquery'))
+
             ## Writing Files
             file_name = "result.csv"
             csv_file = [custom_query_query['csv_header']]
@@ -344,6 +380,7 @@ def customquery():
             return response
     else:
         return render_template('customquery.html', options=custom_query_options)
+
 
 if __name__ == "__main__":
     app.run(debug=True)
