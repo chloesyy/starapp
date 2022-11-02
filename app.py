@@ -304,29 +304,13 @@ def customquery():
                             ## to deal with kids' tv >:( apostrophe throws error
                             if filters_val[0].find('\'') != -1:
                                 filters_val[0] = filters_val[0].replace('\'','\'\'')
-                            ## Initial usage for genre_1 to genre_3 Deprecated use as hard to generalise print genre_1 columns
-                            if type(table_col) == list:
-                                for t_col in table_col[:-1]:
-                                    formatted_filter += f"{t_col} = \'{filters_val[0]}\'"
-                                    formatted_filter += " OR "
-                                formatted_filter += f"{table_col[-1]} = \'{filters_val[0]}\'" 
-                                formatted_filter = "("+formatted_filter+")"
-                            else:
                                 formatted_filter = f"{table_col} = \'{filters_val[0]}\'"
                         else:
                             for i in range(len(filters_val)):
                                 if filters_val[i].find('\'') != -1:
                                     filters_val[i] = filters_val[i].replace('\'','\'\'')
                             filters_val = str(tuple(filters_val)).replace("\"","\'")
-                            ## Initial usage for genre_1 to genre_3 Deprecated use as hard to generalise print genre_1 columns
-                            if type(table_col) == list:
-                                for t_col in table_col[:-1]:
-                                    formatted_filter += f"{t_col} IN {filters_val}"
-                                    formatted_filter += " OR "
-                                formatted_filter += f"{table_col[-1]} IN {filters_val}" 
-                                formatted_filter = "("+formatted_filter+")"
-                            else:
-                                formatted_filter = f"{table_col} IN {filters_val}"
+                            formatted_filter = f"{table_col} IN {filters_val}"
 
                         filter_list.append(formatted_filter)
                 else:
