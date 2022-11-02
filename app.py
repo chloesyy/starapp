@@ -210,6 +210,7 @@ def viewership():
             query = 'SELECT d1.date, SUM(f.view_duration) FROM viewership_fact f, date_dim d1, loc_dim d2, mem_dim d3, show_dim d4 WHERE f.date_key = d1.date_key AND f.loc_key = d2.loc_key AND f.mem_key = d3.mem_key AND f.show_key = d4.show_key GROUP BY d1.date ORDER BY d1.date DESC;'
             query_one, query_three = query.split('GROUP BY')[0], ' GROUP BY' + query.split('GROUP BY')[1]
             query_two = ""
+            idx_0, idx_1 = 0, 1
             if selection['genre'] != 'all':
                 query_two = query_two + f"AND d4.genre_1 = \'{selection['genre'].title()}\'"
             if selection['country'] != 'all': 
@@ -219,12 +220,13 @@ def viewership():
             # TODO: WEEKLY RETURNS INT WHILE DAILY RETUNRNS DATE
             if selection['period'] != 'all':
                 q1_1, q1_2 = query_one.split("d1.date",1)
-                sql_col = "d1."+viewership_period_dict[selection['period']] 
+                sql_col = "d1.year, d1."+viewership_period_dict[selection['period']]
                 q1_1 += sql_col
                 query_one = q1_1 + q1_2
                 # viewership_period_dict[selection['period']] maps html input to sql table col
                 query_three = "GROUP BY " + sql_col
-                query_three += " ORDER BY "+ sql_col + " ASC"
+                query_three += " ORDER BY "+ sql_col 
+                idx_0, idx_1 = 1, 2
                   
             query = query_one + query_two + query_three
             views = list(map(list, zip(*pg.query_db(query))))
@@ -234,26 +236,26 @@ def viewership():
                 return render_template('viewership.html', data=viewership_fact, selection=selection, options=options)
             
             allowable_chart_size = 60
-            if len(views[0]) >= allowable_chart_size: # if series is more than 30, Chart.js will truncate the dates
-                if type(views[0][0]) == int:
-                    step  = len(views[0])//allowable_chart_size
-                    viewership_fact["labels"] = [i for i in views[0]][::step]
-                    viewership_fact["data"] = views[1][::step]
+            if len(views[idx_0]) >= allowable_chart_size: # if series is more than 30, Chart.js will truncate the dates
+                if type(views[idx_0][idx_0]) == int:
+                    step  = len(views[idx_0])//allowable_chart_size
+                    viewership_fact["labels"] = [i for i in views[idx_0]][::step]
+                    viewership_fact["data"] = views[idx_1][::step]
                 else:
-                    step  = len(views[0])//allowable_chart_size
+                    step  = len(views[idx_0])//allowable_chart_size
                     # Suggested way?
-                    viewership_fact["labels"] = [datetime.datetime.strftime(i, "%d/%m/%Y") for i in views[0]][::step]
-                    viewership_fact["data"] = views[1][::step]
+                    viewership_fact["labels"] = [datetime.datetime.strftime(i, "%d/%m/%Y") for i in views[idx_0]][::step]
+                    viewership_fact["data"] = views[idx_1][::step]
                     #viewership_fact["labels"] = [datetime.datetime.strftime(i, "%d/%m/%Y") for i in views[0]][:30][::1]
                     #viewership_fact["data"] = views[1][:30][::1]
 
             else:
                 if type(views[0][0]) == int:
-                    viewership_fact["labels"] = [i for i in views[0]][::1]  
-                    viewership_fact["data"] = views[1][::1]                  
+                    viewership_fact["labels"] = [i for i in views[idx_0]][::1]  
+                    viewership_fact["data"] = views[idx_1][::1]                  
                 else:
-                    viewership_fact["labels"] = [datetime.datetime.strftime(i, "%d/%m/%Y") for i in views[0]][::1]
-                    viewership_fact["data"] = views[1][::1]
+                    viewership_fact["labels"] = [datetime.datetime.strftime(i, "%d/%m/%Y") for i in views[idx_0]][::1]
+                    viewership_fact["data"] = views[idx_1][::1]
             
            #print(viewership_fact)
 
