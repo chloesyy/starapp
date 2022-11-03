@@ -11,7 +11,7 @@ p, li {
 
 .overlay {
     flex-direction: column;
-    width:100vh;
+    width:120vh;
 }
 
 span {
