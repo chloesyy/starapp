@@ -22,7 +22,7 @@ body {
 	margin-right: 10px;
 	font-size: 18px;
 	font-family: 'Roboto', sans-serif;
-	font-weight: bold;
+	/* font-weight: bold; */
 	color: #f4f4f4;
 	text-decoration: none;
 	text-transform: uppercase;

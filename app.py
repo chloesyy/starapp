@@ -45,19 +45,6 @@ class POSTGRES:
         self.cur.close()
         self.conn.close()
 
-def replace_nth(string, old, new, n):
-	index_of_occurrence = string.find(old)
-	occurrence = int(index_of_occurrence != -1)
-	while index_of_occurrence != -1 and occurrence != n:
-		index_of_occurrence = string.find(old, index_of_occurrence + 1)
-		occurrence += 1
-	if occurrence == n:
-		return (
-					string[:index_of_occurrence] + new +
-					string[index_of_occurrence+len(old):]
-		)
-	return string
-
 selection = {
 	'period': 'Daily',
 	'genre': 'ALL',
@@ -217,13 +204,11 @@ def viewership():
                 query_two = query_two + f"AND d2.country_name = \'{selection['country'].title()}\'"
             if selection['plan'] != 'all':
                 query_two = query_two + f"AND d3.plan_type = \'{selection['plan'].title()}\'"
-            # TODO: WEEKLY RETURNS INT WHILE DAILY RETUNRNS DATE
             if selection['period'] != 'all':
                 q1_1, q1_2 = query_one.split("d1.date",1)
                 sql_col = "d1.year, d1."+viewership_period_dict[selection['period']]
                 q1_1 += sql_col
                 query_one = q1_1 + q1_2
-                # viewership_period_dict[selection['period']] maps html input to sql table col
                 query_three = "GROUP BY " + sql_col
                 query_three += " ORDER BY "+ sql_col 
                 idx_0, idx_1 = 1, 2
@@ -235,38 +220,34 @@ def viewership():
                 viewership_fact["data"] = []
                 return render_template('viewership.html', data=viewership_fact, selection=selection, options=options)
             
-            allowable_chart_size = 60
-            if len(views[idx_0]) >= allowable_chart_size: # if series is more than 30, Chart.js will truncate the dates
+            allowable_chart_size = 40
+            if len(views[idx_0]) >= allowable_chart_size:
                 if type(views[idx_0][idx_0]) == int:
                     step  = len(views[idx_0])//allowable_chart_size
                     viewership_fact["labels"] = [i for i in views[idx_0]][::step]
                     viewership_fact["data"] = views[idx_1][::step]
                 else:
                     step  = len(views[idx_0])//allowable_chart_size
-                    # Suggested way?
                     viewership_fact["labels"] = [datetime.datetime.strftime(i, "%d/%m/%Y") for i in views[idx_0]][::step]
                     viewership_fact["data"] = views[idx_1][::step]
-                    #viewership_fact["labels"] = [datetime.datetime.strftime(i, "%d/%m/%Y") for i in views[0]][:30][::1]
-                    #viewership_fact["data"] = views[1][:30][::1]
 
             else:
-                if type(views[0][0]) == int:
+                if type(views[idx_0][0]) == int:
                     viewership_fact["labels"] = [i for i in views[idx_0]][::1]  
                     viewership_fact["data"] = views[idx_1][::1]                  
                 else:
                     viewership_fact["labels"] = [datetime.datetime.strftime(i, "%d/%m/%Y") for i in views[idx_0]][::1]
                     viewership_fact["data"] = views[idx_1][::1]
             
-           #print(viewership_fact)
+            print(viewership_fact["labels"])
+            return render_template('viewership.html', data=viewership_fact, selection=selection, options=options)
 
     else:
         query = 'SELECT d1.date, SUM(f.view_duration) FROM viewership_fact f, date_dim d1  WHERE f.date_key = d1.date_key GROUP BY d1.date ORDER BY d1.date DESC;'
         views = list(map(list, zip(*pg.query_db(query))))
         viewership_fact["labels"] = [datetime.datetime.strftime(i, "%d/%m/%Y") for i in views[0]][:30][::-1]
         viewership_fact["data"] = views[1][:30][::-1]
-    #print(selection)
-    #print(query)
-    #print(options)
+
     return render_template('viewership.html', data=viewership_fact, selection=selection, options=options)
 
 @app.route("/categorical", methods=['GET', 'POST'])
@@ -355,7 +336,6 @@ def customquery():
 
             query = f"SELECT {selection_string} FROM {table_string} WHERE {join_string} AND {filter_string} ORDER BY {sort_by_string} {sort_string};"
             output = pg.query_db(query)
-            print(query)
 
             if len(output) == 0:
                 print("this is output:" , output)
