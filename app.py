@@ -76,14 +76,14 @@ viewership_period_dict = {
 
 ######################## CATEGORICAL DATA ########################
 categorical_selection = {
-    'period': 'Past 7 Days',
+    'period': '7 Days',
     'y_axis': 'Views',
-    'x_axis': 'Genre'
- 
+    'x_axis': 'Genre',
+    'start_date': '2022-10-22'
 }
 
 categorical_options = {
-    'period': ['Past 7 Days', 'Past 30 Days', 'Past 1 Quarter', 'Past 6 Months', 'Past 1 Year'],
+    'period': ['7 Days', '1 Month', '1 Quarter', '6 Months', '1 Year'],
     'y_axis': ['Views', 'Viewing Duration'],
     'x_axis': ['Genre', 'Movie', 'Country', 'Director', 'Plan']
 }
@@ -258,6 +258,7 @@ def categorical():
             categorical_selection['period'] = request.form['period']
             categorical_selection['y_axis'] = request.form['y_axis']
             categorical_selection['x_axis'] = request.form['x_axis']
+            categorical_selection['start_date'] = request.form['start_date']
             
     period_index = categorical_options['period'].index(categorical_selection['period'])
     y_axis_index = categorical_options['y_axis'].index(categorical_selection['y_axis'])
@@ -266,13 +267,16 @@ def categorical():
     period = categorical_query['period'][period_index]
     y_axis = categorical_query['y_axis'][y_axis_index]
     x_axis = categorical_query['x_axis'][x_axis_index]
+    start_date = categorical_selection['start_date'] 
     
-    query = f"SELECT d2.{x_axis['column']} AS {x_axis['name']}, {y_axis} AS total FROM viewership_fact f, date_dim d1, {x_axis['table']} d2 WHERE f.date_key = d1.date_key AND f.{x_axis['key']} = d2.{x_axis['key']} AND d1.date >= DATE '2022-10-22' - INTERVAL \'{period}\' GROUP BY {x_axis['column']} ORDER BY total DESC;"
+    query = f"SELECT d2.{x_axis['column']} AS {x_axis['name']}, {y_axis} AS total FROM viewership_fact f, date_dim d1, {x_axis['table']} d2 WHERE f.date_key = d1.date_key AND f.{x_axis['key']} = d2.{x_axis['key']} AND d1.date >= DATE \'{start_date}\' AND d1.date <= DATE \'{start_date}\' + INTERVAL \'{period}\' GROUP BY {x_axis['column']} ORDER BY total DESC;"
     views = list(map(list, zip(*pg.query_db(query))))
     categorical_data["labels"] = views[0]
     categorical_data["data"] = views[1]
     categorical_data['label'] = categorical_selection['y_axis']
     categorical_data['title'] = f"{categorical_selection['y_axis'].title()} per {categorical_selection['x_axis'].title()}"
+    
+    print(query)
     return render_template('categorical.html', data=categorical_data, selection=categorical_selection, options=categorical_options)
 
 @app.route("/customquery", methods=['GET', 'POST'])
