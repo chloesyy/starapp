@@ -271,12 +271,16 @@ def categorical():
     
     query = f"SELECT d2.{x_axis['column']} AS {x_axis['name']}, {y_axis} AS total FROM viewership_fact f, date_dim d1, {x_axis['table']} d2 WHERE f.date_key = d1.date_key AND f.{x_axis['key']} = d2.{x_axis['key']} AND d1.date >= DATE \'{start_date}\' AND d1.date <= DATE \'{start_date}\' + INTERVAL \'{period}\' GROUP BY {x_axis['column']} ORDER BY total DESC;"
     views = list(map(list, zip(*pg.query_db(query))))
-    categorical_data["labels"] = views[0]
-    categorical_data["data"] = views[1]
+    if views:
+        categorical_data["labels"] = views[0]
+        categorical_data["data"] = views[1]
+    else:
+        categorical_data["labels"] = None
+        categorical_data["data"] = None
+        
     categorical_data['label'] = categorical_selection['y_axis']
     categorical_data['title'] = f"{categorical_selection['y_axis'].title()} per {categorical_selection['x_axis'].title()}"
     
-    print(query)
     return render_template('categorical.html', data=categorical_data, selection=categorical_selection, options=categorical_options)
 
 @app.route("/customquery", methods=['GET', 'POST'])
