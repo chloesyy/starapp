@@ -239,7 +239,26 @@ def viewership():
                     viewership_fact["labels"] = [datetime.datetime.strftime(i, "%d/%m/%Y") for i in views[idx_0]][::1]
                     viewership_fact["data"] = views[idx_1][::1]
             
-            print(viewership_fact["labels"])
+            if selection['period'] == 'weekly':
+                years = pg.query_db('SELECT DISTINCT year FROM date_dim')[::-1]
+                year_index_counter = 0
+                week_year = []
+                for week in viewership_fact["labels"]:
+                    week_year.append('Wk ' + str(week) + '-' + str(years[year_index_counter][0]))
+                    if week == 53:
+                        year_index_counter += 1
+                viewership_fact["labels"] = week_year
+            
+            elif selection['period'] == 'monthly':
+                years = pg.query_db('SELECT DISTINCT year FROM date_dim')[::-1]
+                year_index_counter = 0
+                month_year = []
+                for month in viewership_fact["labels"]:
+                    month_year.append('Mth ' + str(month) + '-' + str(years[year_index_counter][0]))
+                    if month == 12:
+                        year_index_counter += 1
+                viewership_fact["labels"] = month_year
+
             return render_template('viewership.html', data=viewership_fact, selection=selection, options=options)
 
     else:
