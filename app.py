@@ -272,22 +272,20 @@ def viewership():
 @app.route("/categorical", methods=['GET', 'POST'])
 def categorical():
     global categorical_selection, categorical_query
-    period = categorical_query['period'][0]
-    y_axis = categorical_query['y_axis'][0]
-    x_axis = categorical_query['x_axis'][0]
     if request.method == 'POST':
         if request.form.get('submit-button') == 'Submit':
             categorical_selection['period'] = request.form['period']
             categorical_selection['y_axis'] = request.form['y_axis']
             categorical_selection['x_axis'] = request.form['x_axis']
             
-            period_index = categorical_options['period'].index(categorical_selection['period'])
-            y_axis_index = categorical_options['y_axis'].index(categorical_selection['y_axis'])
-            x_axis_index = categorical_options['x_axis'].index(categorical_selection['x_axis'])
-            
-            period = categorical_query['period'][period_index]
-            y_axis = categorical_query['y_axis'][y_axis_index]
-            x_axis = categorical_query['x_axis'][x_axis_index]
+    period_index = categorical_options['period'].index(categorical_selection['period'])
+    y_axis_index = categorical_options['y_axis'].index(categorical_selection['y_axis'])
+    x_axis_index = categorical_options['x_axis'].index(categorical_selection['x_axis'])
+    
+    period = categorical_query['period'][period_index]
+    y_axis = categorical_query['y_axis'][y_axis_index]
+    x_axis = categorical_query['x_axis'][x_axis_index]
+    
     query = f"SELECT d2.{x_axis['column']} AS {x_axis['name']}, {y_axis} AS total FROM viewership_fact f, date_dim d1, {x_axis['table']} d2 WHERE f.date_key = d1.date_key AND f.{x_axis['key']} = d2.{x_axis['key']} AND d1.date >= DATE '2022-10-22' - INTERVAL \'{period}\' GROUP BY {x_axis['column']} ORDER BY total DESC;"
     views = list(map(list, zip(*pg.query_db(query))))
     categorical_data["labels"] = views[0]
