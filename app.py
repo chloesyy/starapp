@@ -206,6 +206,7 @@ def viewership():
                 query_two = query_two + f"AND d3.plan_type = \'{selection['plan'].title()}\'"
             if selection['period'] != 'all':
                 q1_1, q1_2 = query_one.split("d1.date",1)
+                print(q1_2)
                 sql_col = "d1.year, d1."+viewership_period_dict[selection['period']]
                 q1_1 += sql_col
                 query_one = q1_1 + q1_2
@@ -222,12 +223,12 @@ def viewership():
             
             allowable_chart_size = 40
             if len(views[idx_0]) >= allowable_chart_size:
-                if type(views[idx_0][idx_0]) == int:
-                    step  = len(views[idx_0])//allowable_chart_size
+                if type(views[idx_0][idx_0]) == int: #year
+                    step = len(views[idx_0])//allowable_chart_size
                     viewership_fact["labels"] = [i for i in views[idx_0]][::step]
                     viewership_fact["data"] = views[idx_1][::step]
                 else:
-                    step  = len(views[idx_0])//allowable_chart_size
+                    step = len(views[idx_0])//allowable_chart_size
                     viewership_fact["labels"] = [datetime.datetime.strftime(i, "%d/%m/%Y") for i in views[idx_0]][::step]
                     viewership_fact["data"] = views[idx_1][::step]
 
