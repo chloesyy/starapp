@@ -40,10 +40,10 @@
           <img class="netflix-logo" src="../static/images/logo.png" />
         </div>
         <div class="toggle">
-          <a href="/" style="margin-right: 40px">Insights</a>
-          <a href="/viewership" style="margin-right: 40px">Viewership</a>
-          <a href="/categorical" style="margin-right: 40px">Categorical</a>
-          <a href="/customquery">Query</a>
+          <a href="/" class="navlink" id="insights" style="margin-right: 40px;">Insights</a>
+          <a href="/viewership"  class="navlink" id="viewership" style="margin-right: 40px;">Viewership</a>
+          <a href="/categorical" class="navlink" id="categorical" style="margin-right: 40px;">Categorical</a>
+          <a href="/customquery" class="navlink" id="query">Query</a>
         </div>
       </div>
 
@@ -158,4 +158,14 @@
     </div>
     <div>
   </body>
+
+  <script>
+    navlinks = document.getElementsByClassName("navlink");
+    for (i = 0; i < navlinks.length; i++) {
+        navlinks[i].style.color = "white";
+    }
+
+    document.getElementById("query").style.color = "#E50914";
+    document.getElementById("query").style.fontWeight = "bold";
+</script>
 </html>

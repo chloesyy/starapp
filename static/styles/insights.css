@@ -1,7 +1,7 @@
-@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Poppins&family=Roboto&display=swap');
 
 .container {
-    font-family: 'Bebas Neue', sans-serif;
+    font-family: 'Bebas neue', sans-serif;
     font-size: 36px;
 }
 
